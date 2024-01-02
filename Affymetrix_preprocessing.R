@@ -3,30 +3,20 @@
 
 # Data ploatform: Affymetrix, probe-level data produced by array scanner software (.CEL)
 
-#=====================================================================================
-# Directories 
-#=====================================================================================
-datadir ="/Users/../data/AffyExample/GSE12502/GSE12502_RAW"
-
-#=====================================================================================
 # Load packages
-#=====================================================================================
 source("http://bioconductor.org/biocLite.R")
 biocLite("affy")
 library("affy")
 library(GEOquery) # import data from GEO
 
-#=====================================================================================
-# Load data files 
-#=====================================================================================
+# Load data
+datadir ="/Users/data/GSE12502_RAW"
 list.files()
 list.celfiles()
 rawdata=ReadAffy()
 rawdata
 
-#=====================================================================================
 # Data exploration
-#=====================================================================================
 length(sampleNames(rawdata))
 sampleNames(rawdata)
 geneNames(rawdata)[1:5]
@@ -46,9 +36,8 @@ mm(rawdata)[1:4,1:4]
 
 sampleNames(rawdata)
 
-#=====================================================================================
 # Run RMA and return log2 transformed data
-#=====================================================================================
+
 jrma=justRMA()
 exprs(jrma)[1:4,1:4]
 

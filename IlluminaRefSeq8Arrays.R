@@ -4,14 +4,7 @@
   # 4 Rx: 2 Control, co-reg X, Y
   # 3 timepoints
 
-#=====================================================================================
-# Directories 
-#=====================================================================================
-datadir="/Users/../data/Illumina_RefSeq8_arrays"
-
-#=====================================================================================
 # Load packages
-#=====================================================================================
 source("http://bioconductor.org/biocLite.R")
 biocLite("affy")
 library("affy")
@@ -21,9 +14,8 @@ library("genefilter") # QA plot
 library("latticeExtra") # QA plot
 library("genefilter") #required for rowSds
 
-#=====================================================================================
 # Load data files - GenomeStudio Summary files
-#=====================================================================================
+datadir="/Users/../data/Illumina_RefSeq8_arrays"
 setwd(datadir)
 
 sfile="mySample Probe Profile FinalReport.txt" #standard probe profile output from GenomeStudio
@@ -36,16 +28,12 @@ targets=read.csv(file="SampleChars.csv",row.names=1)
 head(targets) #contains treatment/time
 rawdata$targets=targets[colnames(rawdata),] #store targets w/rawdata
 
-#=====================================================================================
 # Study Design
-#=====================================================================================
 Type = paste(rawdata$targets$treatment,rawdata$targets$time,sep="_")
 table(rawdata$targets$treatment,rawdata$targets$time)
 table(Type) 
 
-#=====================================================================================
 # Boxplot of intensity of sample probes across arrays 
-#=====================================================================================
 boxplot(log2(rawdata$E[rawdata$genes$Status=="regular",]),range=0,xlab="Arrays",
 	ylab="log2 intensities",main="Regular probes")
 
@@ -60,9 +48,7 @@ for (i in 2:na)
 	lines(density(log2(rawdata$E[rawdata$genes$Status=="regular",i])),col=i,lty=i)
 legend(12,1.2,colnames(rawdata$E),lty=1:5,col=1:6,cex=.9) 
 
-#=====================================================================================
 # QA plot
-#=====================================================================================
 library("genefilter") 
 library("latticeExtra") 
 dd=dist2(log2(rawdata$E[rawdata$genes$Status=="regular",]))
@@ -77,9 +63,7 @@ lp=levelplot(dd[row.ord,row.ord],
 lp
 rm(dd,row.ord,lp)
 
-#=====================================================================================
 # Estimate the proportion of genes expressed on each array
-#=====================================================================================
 library(limma)
 proportion=propexpr(rawdata)
 names(proportion)=targets$treatment
@@ -88,9 +72,7 @@ proportion
 tapply(proportion,targets$time,mean)
 tapply(proportion,targets$treatment,mean)
 
-#=====================================================================================
 # Summarize numbers of control probes
-#=====================================================================================
 head(unique(rawdata$gene$Status),n=10)
 length(unique(rawdata$gene$Status))
 sum(rawdata$gene$Status!="regular")
@@ -101,9 +83,7 @@ table(rawdata$gene$Status)
 boxplot(log2(rawdata$E[rawdata$genes$Status=="NEGATIVE",]),range=0,xlab="Arrays",
         ylab="log2 intensities",main="Negative control probes")
 
-#=====================================================================================
 # Plot the control probes across arrays
-#=====================================================================================
 # first 664 control probes
 sum(rawdata$gene$Status=="NEGATIVE")
 n.ncp=sum(rawdata$gene$Status=="NEGATIVE")
@@ -117,9 +97,7 @@ axis(1,1:48,rownames(rawdata$targets))
 axis(2)
 box()
 
-#=====================================================================================
 # Background correction + quantile normalization + log2 transformation
-#=====================================================================================
 dat = neqc(rawdata)
 dim(dat) #24526 x 48 #control probes removed!
 # illustrate the effect of log2 transf. on variance
@@ -127,9 +105,7 @@ library("genefilter") #required for rowSds
 # the "unclass" command removes the class of an object: only remains the underlying type (usually, "list")
 batch = unclass(dat$targets$treatment)
 
-#=====================================================================================
 # MA plot
-#=====================================================================================
 # create MA plot of each batch
 dat=dat[,order(dat$targets$treatment,dat$targets$time)]
 idx=(dat$targets$treatment=="Control2")
@@ -147,9 +123,7 @@ for (i in 1:4) {
 dev.off()
 rm(M,A)
 
-#=====================================================================================
 # Batch correction
-#=====================================================================================
 dat$targets$Type=paste(dat$targets$treatment, dat$targets$time, sep="_")
 library("sva")
 plotMDS(dat,labels=dat$targets$Type,
